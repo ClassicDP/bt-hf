@@ -4,7 +4,7 @@
 #include <string.h>
 #include "esp_hf_ag_api.h"
 
-#define TARGET_NAME "Jabra"  // замените на имя вашей гарнитуры
+
 
 const char *TAG = "HF_AG_CONNECT";
 esp_bd_addr_t target_addr;
@@ -24,7 +24,7 @@ void gap_callback(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param) {
                         memcpy(name, name_ptr, len);
                         name[len] = '\0';
                         ESP_LOGI(TAG, "Found device: %s", name);
-                        if (strstr(name, TARGET_NAME)) {
+                        if (strstr(name, TARGET_NAME)) { // TARGET_NAME определён в main.c
                             ESP_LOGI(TAG, "🎯 Target found: %s", name);
                             memcpy(target_addr, bd_addr, ESP_BD_ADDR_LEN);
                             found = true;

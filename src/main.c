@@ -1,3 +1,4 @@
+#define TARGET_NAME "Jabra"  // замените на имя вашей гарнитуры
 
 #include "bt_app.h"
 #include "gap_handler.h"
