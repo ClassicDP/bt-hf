@@ -1,0 +1,51 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/aarch64/ninja -G Ninja -S /Users/dp/Documents/PlatformIO/Projects/bt-hf -B /Users/dp/Documents/PlatformIO/Projects/bt-hf/cmake-build-debug
+-- IDF_TARGET not set, using default target: esp32
+-- Found Git: /usr/bin/git (found version "2.39.5 (Apple Git-154)") 
+-- The C compiler identification is unknown
+-- The CXX compiler identification is unknown
+-- The ASM compiler identification is unknown
+-- Found assembler: xtensa-esp32-elf-gcc
+CMake Error at /Users/dp/esp/esp-idf/tools/cmake/project.cmake:506 (__project):
+  The CMAKE_C_COMPILER:
+
+    xtensa-esp32-elf-gcc
+
+  is not a full path and was not found in the PATH.
+
+  Tell CMake where to find the compiler by setting either the environment
+  variable "CC" or the CMake cache entry CMAKE_C_COMPILER to the full path to
+  the compiler, or to the compiler name if it is in the PATH.
+Call Stack (most recent call first):
+  CMakeLists.txt:3 (project)
+
+
+CMake Error at /Users/dp/esp/esp-idf/tools/cmake/project.cmake:506 (__project):
+  The CMAKE_CXX_COMPILER:
+
+    xtensa-esp32-elf-g++
+
+  is not a full path and was not found in the PATH.
+
+  Tell CMake where to find the compiler by setting either the environment
+  variable "CXX" or the CMake cache entry CMAKE_CXX_COMPILER to the full path
+  to the compiler, or to the compiler name if it is in the PATH.
+Call Stack (most recent call first):
+  CMakeLists.txt:3 (project)
+
+
+CMake Error at /Users/dp/esp/esp-idf/tools/cmake/project.cmake:506 (__project):
+  The CMAKE_ASM_COMPILER:
+
+    xtensa-esp32-elf-gcc
+
+  is not a full path and was not found in the PATH.
+
+  Tell CMake where to find the compiler by setting either the environment
+  variable "ASM" or the CMake cache entry CMAKE_ASM_COMPILER to the full path
+  to the compiler, or to the compiler name if it is in the PATH.
+Call Stack (most recent call first):
+  CMakeLists.txt:3 (project)
+
+
+-- Warning: Did not find file Compiler/-ASM
+-- Configuring incomplete, errors occurred!

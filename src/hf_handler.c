@@ -1,5 +1,6 @@
 #include "hf_handler.h"
 #include "gap_handler.h"
+#include "audio_test.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -134,6 +135,7 @@ void hf_ag_event_handler(esp_hf_cb_event_t event, esp_hf_cb_param_t *param) {
             switch (param->audio_stat.state) {
                 case ESP_HF_AUDIO_STATE_DISCONNECTED:
                     ESP_LOGW(TAG, "🔇 SCO Disconnected");
+                    audio_test_handle_sco_disconnected();
                     break;
                 case ESP_HF_AUDIO_STATE_CONNECTING:
                     ESP_LOGI(TAG, "🔊 SCO Connecting...");
@@ -141,10 +143,14 @@ void hf_ag_event_handler(esp_hf_cb_event_t event, esp_hf_cb_param_t *param) {
                 case ESP_HF_AUDIO_STATE_CONNECTED:
                     ESP_LOGI(TAG, "🔊 SCO Connected - Audio channel is now open!");
                     ESP_LOGI(TAG, "🎉 SUCCESS: Full HFP connection with audio established!");
+                    audio_test_handle_sco_connected();
+                    audio_test_handle_codec_change(false); // CVSD codec
                     break;
                 case ESP_HF_AUDIO_STATE_CONNECTED_MSBC:
                     ESP_LOGI(TAG, "🔊 SCO Connected with mSBC codec - High quality audio!");
                     ESP_LOGI(TAG, "🎉 SUCCESS: Full HFP connection with mSBC audio established!");
+                    audio_test_handle_sco_connected();
+                    audio_test_handle_codec_change(true); // mSBC codec
                     break;
                 default:
                     ESP_LOGI(TAG, "SCO Unknown state: %d", param->audio_stat.state);
@@ -247,5 +253,43 @@ void hf_ag_event_handler(esp_hf_cb_event_t event, esp_hf_cb_param_t *param) {
         default:
             ESP_LOGI(TAG, "⚠️ Unhandled HF event: %d", event);
             break;
+    }
+}
+
+// Функция для тестирования аудио соединения
+void hf_test_audio_connection(void)
+{
+    if (!connection_established) {
+        ESP_LOGW(TAG, "⚠️ No HF connection established - cannot test audio");
+        return;
+    }
+
+    ESP_LOGI(TAG, "🧪 Testing audio connection...");
+
+    // Получаем статистику аудио
+    audio_stats_t* stats = audio_test_get_stats();
+    ESP_LOGI(TAG, "📊 Current audio stats:");
+    ESP_LOGI(TAG, "  SCO Active: %s", stats->is_sco_active ? "Yes" : "No");
+    ESP_LOGI(TAG, "  mSBC Active: %s", stats->is_msbc_active ? "Yes" : "No");
+    ESP_LOGI(TAG, "  Total SCO connections: %lu", stats->sco_connections);
+
+    // Если SCO не активен, пытаемся установить соединение
+    if (!stats->is_sco_active) {
+        ESP_LOGI(TAG, "🔊 Attempting to establish SCO connection...");
+        esp_err_t result = audio_test_connect_sco(connected_device_addr);
+        if (result == ESP_OK) {
+            ESP_LOGI(TAG, "✅ SCO connection request sent");
+        } else {
+            ESP_LOGE(TAG, "❌ Failed to send SCO connection request: %s", esp_err_to_name(result));
+        }
+    } else {
+        ESP_LOGI(TAG, "🔊 SCO connection is already active");
+
+        // Тестируем управление громкостью
+        ESP_LOGI(TAG, "🎚️ Testing volume control...");
+        audio_test_volume_control(connected_device_addr, 8); // Средняя громкость
+
+        // Выводим подробную статистику
+        audio_test_print_stats();
     }
 }

@@ -2,6 +2,7 @@
 #include "bt_app_core.h"
 #include "gap_handler.h"
 #include "hf_handler.h"
+#include "audio_test.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
@@ -50,12 +51,31 @@ static void bt_hf_hdl_stack_evt(uint16_t event, void *p_param)
     }
 }
 
+// Задача для периодического тестирования аудио
+static void audio_test_task(void *param)
+{
+    ESP_LOGI(BT_HF_AG_TAG, "🎧 Audio test task started");
+
+    while (1) {
+        // Ждем 60 секунд между тестами
+        vTaskDelay(pdMS_TO_TICKS(60000));
+
+        ESP_LOGI(BT_HF_AG_TAG, "🔄 Performing periodic audio test...");
+        hf_test_audio_connection();
+    }
+}
+
 void app_main(void) {
     char bda_str[18] = {0};
     
     // Инициализация Bluetooth стека
     bt_app_init();
     
+    // Инициализация системы тестирования звука
+    ESP_LOGI(BT_HF_AG_TAG, "🎧 Initializing audio test system...");
+    audio_test_init();
+    audio_test_start_monitoring();
+
     // Создание задачи приложения
     bt_app_task_start_up();
     
@@ -66,6 +86,9 @@ void app_main(void) {
     // Отправка события инициализации стека
     bt_app_work_dispatch(bt_hf_hdl_stack_evt, BT_APP_EVT_STACK_UP, NULL, 0, NULL);
     
+    // Создание задачи для периодического тестирования аудио
+    xTaskCreate(audio_test_task, "audio_test_task", 2048, NULL, 5, NULL);
+
     ESP_LOGI(BT_HF_AG_TAG, "=== HF AG Demo Started ===");
     ESP_LOGI(BT_HF_AG_TAG, "Target device: %s", TARGET_NAME);
     ESP_LOGI(BT_HF_AG_TAG, "Waiting for connection...");
