@@ -2,6 +2,7 @@
 #include "bt_app_core.h"
 #include "gap_handler.h"
 #include "hf_handler.h"
+#include "console_handler.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
@@ -40,8 +41,8 @@ static void bt_hf_hdl_stack_evt(uint16_t event, void *p_param)
             // Даем время системе Bluetooth полностью инициализироваться
             vTaskDelay(pdMS_TO_TICKS(1000));
             
-            // Запускаем первоначальный поиск
-            gap_start_discovery();
+            // Сначала пробуем переподключиться к последнему устройству
+            gap_try_reconnect_to_last_device();
             break;
             
         default:
@@ -65,6 +66,9 @@ void app_main(void) {
     
     // Отправка события инициализации стека
     bt_app_work_dispatch(bt_hf_hdl_stack_evt, BT_APP_EVT_STACK_UP, NULL, 0, NULL);
+    
+    // Инициализация консольного обработчика
+    console_handler_init();
     
     ESP_LOGI(BT_HF_AG_TAG, "=== HF AG Demo Started ===");
     ESP_LOGI(BT_HF_AG_TAG, "Target device: %s", TARGET_NAME);

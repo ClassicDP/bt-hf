@@ -1,6 +1,9 @@
 #include "bt_app.h"
 #include "gap_handler.h"
 #include "hf_handler.h"
+#include "audio_handler.h"
+#include "paired_devices.h"
+#include "auto_reconnect.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "esp_bt.h"
@@ -75,6 +78,28 @@ void bt_app_init(void) {
 
     // Initialize HF AG - как в официальном примере
     ESP_ERROR_CHECK(esp_hf_ag_init());
+
+    // Initialize audio handler for HCI data path
+    audio_handler_init();
+
+    // Initialize paired devices module
+    ret = paired_devices_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize paired devices: %s", esp_err_to_name(ret));
+        return;
+    }
+    ESP_LOGI(TAG, "✅ Paired devices module initialized");
+
+    // Initialize auto-reconnect module
+    ret = auto_reconnect_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize auto-reconnect: %s", esp_err_to_name(ret));
+        return;
+    }
+    ESP_LOGI(TAG, "✅ Auto-reconnect module initialized");
+
+    // Print list of paired devices
+    paired_devices_print_list();
 
     // Configure security - как в официальном примере
     esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_VARIABLE;
